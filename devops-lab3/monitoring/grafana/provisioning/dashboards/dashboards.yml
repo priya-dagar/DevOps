@@ -1,0 +1,8 @@
+# Lab 3 - grafana dashboard provisioning
+apiVersion: 1
+providers:
+  - name: lab3
+    folder: Lab3
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards

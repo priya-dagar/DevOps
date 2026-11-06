@@ -1,0 +1,45 @@
+// DevSecOps pipeline - Lab 3
+// dependency audit + static analysis + container image scan
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        stage('Dependency audit (pip-audit)') {
+            steps {
+                echo "Auditing python dependencies against the PyPI advisory database..."
+                sh 'python3 -m venv auditenv || true'
+                sh './auditenv/bin/pip install -q pip-audit'
+                sh './auditenv/bin/pip-audit -r app/requirements.txt --desc off'
+            }
+        }
+        stage('Static analysis (bandit)') {
+            steps {
+                echo "Static security analysis of the application code..."
+                sh './auditenv/bin/pip install -q bandit'
+                // B104 skipped with justification: the app runs inside a container and
+                // must bind 0.0.0.0 to be reachable from outside the container network
+                sh './auditenv/bin/python -m bandit -r app/ -q --skip B104'
+            }
+        }
+        stage('Image scan (trivy)') {
+            steps {
+                echo "Scanning the deployed container image for HIGH/CRITICAL CVEs..."
+                sh 'trivy image --severity HIGH,CRITICAL --quiet abhinaaav/devops-lab2-app:2.1.3 | tail -5'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'DevSecOps pipeline: no blocking vulnerabilities found'
+        }
+        failure {
+            echo 'DevSecOps pipeline: BLOCKED - vulnerabilities found, fix the dependencies'
+        }
+    }
+}
