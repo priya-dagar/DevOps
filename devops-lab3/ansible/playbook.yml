@@ -1,0 +1,49 @@
+---
+# Lab 3 - automate infrastructure and application configuration
+- name: Configure the control machine (localhost)
+  hosts: local
+  become: false
+  tasks:
+    - name: Create a lab report directory
+      file:
+        path: /tmp/lab3-ansible
+        state: directory
+        mode: "0755"
+
+    - name: Record the managed hosts
+      copy:
+        content: "configured by ansible on {{ inventory_hostname }}\n"
+        dest: /tmp/lab3-ansible/{{ inventory_hostname }}.txt
+
+- name: Configure the managed node and deploy the app page
+  hosts: dockernodes
+  become: false
+  tasks:
+    - name: Install nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: true
+
+    - name: Deploy the application index page
+      copy:
+        content: |
+          <h1>Lab 3 - configured by Ansible</h1>
+          <p>Host: {{ inventory_hostname }}</p>
+          <p>App version: 3.0.0</p>
+        dest: /var/www/html/index.html
+        mode: "0644"
+
+    - name: Start nginx (container has no systemd)
+      shell: "service nginx start || service nginx reload"
+      changed_when: false
+
+    - name: Check nginx responds
+      uri:
+        url: http://localhost/
+        return_content: true
+      register: nginx_check
+
+    - name: Show the deployed page
+      debug:
+        msg: "nginx responded HTTP {{ nginx_check.status }} with the deployed page"
