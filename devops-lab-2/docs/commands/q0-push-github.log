@@ -1,0 +1,4 @@
+$ git remote add origin https://github.com/theabhinav0231/devops-lab-2.git
+$ git push -u origin main   # authenticated with personal access token
+To https://github.com/theabhinav0231/devops-lab-2.git
+ * [new branch]      main -> main

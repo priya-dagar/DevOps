@@ -1,0 +1,11 @@
+### Demo 3: a bind mount maps a host directory into the container
+
+$ echo "edited from the host" > ~/lab2-bindmount-data/host-note.txt
+$ docker run --rm -v ~/lab2-bindmount-data:/data ubuntu:24.04 cat /data/host-note.txt
+edited from the host
+
+$ docker run --rm -v ~/lab2-bindmount-data:/data ubuntu:24.04 sh -c "echo written-by-container >> /data/host-note.txt"
+$ cat ~/lab2-bindmount-data/host-note.txt   (on the host)
+edited from the host
+written-by-container
+--> both sides see the same file: bind mount is synced with the host filesystem

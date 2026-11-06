@@ -1,0 +1,37 @@
+$ git init
+Initialized empty Git repository in /home/abhinav/devops-lab-2/.git/
+
+$ git add . && git status --short
+A  .gitignore
+A  README.md
+A  app/app.py
+A  app/requirements.txt
+A  docker/.dockerignore
+A  docker/Dockerfile
+A  docker/docker-compose.yml
+A  docs/commands/q0-git-init.log
+A  docs/commands/q0-local-test-run.log
+A  k8s/configmap.yaml
+A  k8s/deployment.yaml
+A  k8s/service.yaml
+A  tests/test_app.py
+
+$ git commit -m "initial commit: flask app v2.0.0 with Dockerfile, compose and k8s manifests"
+[main (root-commit) 5a936fc] initial commit: flask app v2.0.0 with Dockerfile, compose and k8s manifests
+ 13 files changed, 203 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100644 README.md
+ create mode 100644 app/app.py
+ create mode 100644 app/requirements.txt
+ create mode 100644 docker/.dockerignore
+ create mode 100644 docker/Dockerfile
+ create mode 100644 docker/docker-compose.yml
+ create mode 100644 docs/commands/q0-git-init.log
+ create mode 100644 docs/commands/q0-local-test-run.log
+ create mode 100644 k8s/configmap.yaml
+ create mode 100644 k8s/deployment.yaml
+ create mode 100644 k8s/service.yaml
+ create mode 100644 tests/test_app.py
+
+$ git log --oneline
+5a936fc initial commit: flask app v2.0.0 with Dockerfile, compose and k8s manifests

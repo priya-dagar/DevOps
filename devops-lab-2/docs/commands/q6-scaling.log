@@ -1,0 +1,27 @@
+
+### SCALING: increase replicas from 2 to 4
+$ kubectl scale deployment/lab2-app --replicas=4
+deployment.apps/lab2-app scaled
+$ kubectl get pods -l app=lab2-app
+NAME                        READY   STATUS        RESTARTS   AGE
+lab2-app-56dd487c9b-2ctj2   1/1     Terminating   0          73s
+lab2-app-56dd487c9b-682tp   1/1     Terminating   0          86s
+lab2-app-88f4c9fc9-bv4qd    1/1     Running       0          26s
+lab2-app-88f4c9fc9-snrr5    1/1     Running       0          38s
+lab2-app-88f4c9fc9-tnb9c    1/1     Running       0          12s
+lab2-app-88f4c9fc9-v8vv5    1/1     Running       0          12s
+
+$ kubectl get deployment lab2-app
+NAME       READY   UP-TO-DATE   AVAILABLE   AGE
+lab2-app   4/4     4            4           19m
+
+### scale back down to 2
+$ kubectl scale deployment/lab2-app --replicas=2
+deployment.apps/lab2-app scaled
+$ kubectl get pods -l app=lab2-app
+NAME                        READY   STATUS        RESTARTS   AGE
+lab2-app-56dd487c9b-2ctj2   1/1     Terminating   0          85s
+lab2-app-88f4c9fc9-bv4qd    1/1     Running       0          38s
+lab2-app-88f4c9fc9-snrr5    1/1     Running       0          50s
+lab2-app-88f4c9fc9-tnb9c    1/1     Terminating   0          24s
+lab2-app-88f4c9fc9-v8vv5    1/1     Terminating   0          24s

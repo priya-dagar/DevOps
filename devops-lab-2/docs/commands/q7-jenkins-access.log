@@ -1,0 +1,4 @@
+$ copy minikube certs into /var/lib/jenkins/.minikube-certs and point the kubeconfig there
+$ sudo -u jenkins kubectl get nodes
+NAME       STATUS   ROLES           AGE   VERSION
+minikube   Ready    control-plane   49m   v1.37.0

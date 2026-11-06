@@ -1,0 +1,27 @@
+# Lab 2 - multi-container setup: flask app + redis
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: devops-lab2-app:2.0.0
+    ports:
+      - "5000:5000"
+    environment:
+      - APP_VERSION=2.0.0
+    depends_on:
+      - redis
+    networks:
+      - lab2net
+
+  redis:
+    image: redis:7-alpine
+    container_name: lab2-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - lab2net
+
+networks:
+  lab2net:
+    driver: bridge

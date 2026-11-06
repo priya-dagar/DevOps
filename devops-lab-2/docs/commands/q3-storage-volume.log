@@ -1,0 +1,20 @@
+### Demo 2: a named volume SURVIVES container deletion
+
+$ docker volume create lab2data
+lab2data
+$ docker run -d --name demo-vol -v lab2data:/data ubuntu:24.04 sleep infinity
+c5e2183b5e8a4933f73199f9ef56a68767b0a923e3447e85ad75b03d3a07a625
+$ docker exec demo-vol sh -c "echo persistent-data > /data/note.txt && cat /data/note.txt"
+persistent-data
+
+$ docker rm -f demo-vol && docker run -d --name demo-vol -v lab2data:/data ubuntu:24.04 sleep infinity
+demo-vol
+df34cc335ea2592ec4cffaf44142fdd4672dbcf9df3a0e9758cfe14633f3be93
+$ docker exec demo-vol cat /data/note.txt
+persistent-data
+--> file SURVIVED: named volume lives outside the container lifecycle
+
+$ docker volume inspect lab2data | grep -A2 Mountpoint
+        "Mountpoint": "/var/lib/docker/volumes/lab2data/_data",
+        "Name": "lab2data",
+        "Options": null,

@@ -1,0 +1,161 @@
+### Build the image inside minikube docker context so the cluster can use it
+$ eval $(minikube docker-env) && docker build -f docker/Dockerfile -t devops-lab2-app:2.0.0 .
+! Using the docker-env command with the containerd runtime is a highly experimental feature, please provide feedback or contribute to make it better
+Identity added: /home/abhinav/.minikube/machines/minikube/id_rsa (/home/abhinav/.minikube/machines/minikube/id_rsa)
+Host added: /home/abhinav/.ssh/known_hosts ([127.0.0.1]:44620)
+#0 building with "default" instance using docker-container driver
+
+#1 [internal] booting buildkit
+#1 pulling image moby/buildkit:buildx-stable-1
+#1 pulling image moby/buildkit:buildx-stable-1 32.1s done
+#1 ERROR: failed to inspect pulled image moby/buildkit:buildx-stable-1: Error response from daemon: 404 page not found
+------
+ > [internal] booting buildkit:
+------
+ERROR: failed to build: failed to inspect pulled image moby/buildkit:buildx-stable-1: Error response from daemon: 404 page not found
+
+$ docker images | grep devops-lab2   (image now lives inside the minikube node)
+
+### Apply the Kubernetes manifests
+$ kubectl apply -f k8s/
+configmap/lab2-app-config created
+deployment.apps/lab2-app created
+service/lab2-app-service created
+
+$ kubectl get deployments,pods,services
+NAME                       READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/lab2-app   0/2     2            0           0s
+
+NAME                           READY   STATUS              RESTARTS   AGE
+pod/lab2-app-96bfbf6d6-9b5b2   0/1     ContainerCreating   0          0s
+pod/lab2-app-96bfbf6d6-rwqqc   0/1     ContainerCreating   0          0s
+
+NAME                       TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+service/kubernetes         ClusterIP   10.96.0.1        <none>        443/TCP          26m
+service/lab2-app-service   NodePort    10.100.128.147   <none>        5000:30080/TCP   0s
+
+$ kubectl rollout status deployment/lab2-app --timeout=120s
+Waiting for deployment "lab2-app" rollout to finish: 0 of 2 updated replicas are available...
+error: timed out waiting for the condition
+
+$ kubectl get pods -l app=lab2-app -o wide
+NAME                       READY   STATUS         RESTARTS   AGE    IP           NODE       NOMINATED NODE   READINESS GATES
+lab2-app-96bfbf6d6-9b5b2   0/1     ErrImagePull   0          2m1s   10.244.0.4   minikube   <none>           <none>
+lab2-app-96bfbf6d6-rwqqc   0/1     ErrImagePull   0          2m1s   10.244.0.3   minikube   <none>           <none>
+
+$ kubectl describe configmap lab2-app-config | tail -5
+
+BinaryData
+====
+
+Events:  <none>
+
+### Access the app through the NodePort
+$ minikube service lab2-app-service --url
+
+X Exiting due to SVC_UNREACHABLE: service not available: no running pod for service lab2-app-service found
+* 
+╭─────────────────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                             │
+│    * If the above advice does not help, please let us know:                                 │
+│      https://github.com/kubernetes/minikube/issues/new/choose                               │
+│                                                                                             │
+│    * Please run `minikube logs --file=logs.txt` and attach logs.txt to the GitHub issue.    │
+│    * Please also attach the following file to the GitHub issue:                             │
+│    * - /tmp/minikube_service_3489c6d5f74fb6ad14c162c9fae5f0d8d14ea32c_0.log                 │
+│                                                                                             │
+╰─────────────────────────────────────────────────────────────────────────────────────────────╯
+
+
+$ curl $(minikube service lab2-app-service --url)/health
+X Exiting due to SVC_UNREACHABLE: service not available: no running pod for service lab2-app-service found
+* 
+╭─────────────────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                             │
+│    * If the above advice does not help, please let us know:                                 │
+│      https://github.com/kubernetes/minikube/issues/new/choose                               │
+│                                                                                             │
+│    * Please run `minikube logs --file=logs.txt` and attach logs.txt to the GitHub issue.    │
+│    * Please also attach the following file to the GitHub issue:                             │
+│    * - /tmp/minikube_service_3489c6d5f74fb6ad14c162c9fae5f0d8d14ea32c_0.log                 │
+│                                                                                             │
+╰─────────────────────────────────────────────────────────────────────────────────────────────╯
+
+$ curl $(minikube service lab2-app-service --url)/
+X Exiting due to SVC_UNREACHABLE: service not available: no running pod for service lab2-app-service found
+* 
+╭─────────────────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                             │
+│    * If the above advice does not help, please let us know:                                 │
+│      https://github.com/kubernetes/minikube/issues/new/choose                               │
+│                                                                                             │
+│    * Please run `minikube logs --file=logs.txt` and attach logs.txt to the GitHub issue.    │
+│    * Please also attach the following file to the GitHub issue:                             │
+│    * - /tmp/minikube_service_3489c6d5f74fb6ad14c162c9fae5f0d8d14ea32c_0.log                 │
+│                                                                                             │
+╰─────────────────────────────────────────────────────────────────────────────────────────────╯
+
+
+# NOTE: docker-env build is experimental with the containerd runtime and failed
+#       (buildkit 404). Using the supported approach: minikube image load
+
+$ minikube image load devops-lab2-app:2.0.0
+$ minikube image ls | grep devops-lab2
+docker.io/library/devops-lab2-app:2.0.0
+
+$ kubectl rollout restart deployment/lab2-app
+deployment.apps/lab2-app restarted
+$ kubectl rollout status deployment/lab2-app --timeout=180s
+Waiting for deployment "lab2-app" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "lab2-app" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "lab2-app" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "lab2-app" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "lab2-app" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "lab2-app" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "lab2-app" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "lab2-app" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "lab2-app" rollout to finish: 1 old replicas are pending termination...
+deployment "lab2-app" successfully rolled out
+
+$ kubectl get pods -l app=lab2-app -o wide
+NAME                        READY   STATUS        RESTARTS   AGE     IP           NODE       NOMINATED NODE   READINESS GATES
+lab2-app-6b76d4c76f-bdqmj   1/1     Running       0          24s     10.244.0.5   minikube   <none>           <none>
+lab2-app-6b76d4c76f-spsnb   1/1     Running       0          13s     10.244.0.6   minikube   <none>           <none>
+lab2-app-96bfbf6d6-rwqqc    1/1     Terminating   0          3m35s   10.244.0.3   minikube   <none>           <none>
+
+$ kubectl get deployments,services
+NAME                       READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/lab2-app   2/2     2            2           3m35s
+
+NAME                       TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+service/kubernetes         ClusterIP   10.96.0.1        <none>        443/TCP          29m
+service/lab2-app-service   NodePort    10.100.128.147   <none>        5000:30080/TCP   3m35s
+
+$ curl $(minikube service lab2-app-service --url)/health
+! Because you are using a Docker driver on linux, the terminal needs to be open to run it.
+
+### Access through the NodePort (service: 5000 -> nodePort 30080)
+$ kubectl get service lab2-app-service
+NAME               TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+lab2-app-service   NodePort   10.100.128.147   <none>        5000:30080/TCP   14m
+
+$ NODE_IP=$(kubectl get nodes -o jsonpath="{.items[0].Status.Addresses[0].address}")
+$ curl http://$NODE_IP:30080/health
+node IP: 
+
+$ curl http://$NODE_IP:30080/
+
+
+### Access through the NodePort (service: 5000 -> nodePort 30080)
+$ kubectl get service lab2-app-service
+NAME               TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+lab2-app-service   NodePort   10.100.128.147   <none>        5000:30080/TCP   15m
+
+$ minikube ip
+192.168.49.2
+$ curl http://192.168.49.2:30080/health
+{"status":"UP","version":"2.0.0"}
+
+$ curl http://192.168.49.2:30080/
+{"message":"DevOps Lab 2 app running on Kubernetes (Minikube)","version":"2.0.0"}
+

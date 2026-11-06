@@ -1,0 +1,7 @@
+# Lab 2 - ConfigMap for the flask app
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lab2-app-config
+data:
+  APP_MESSAGE: "DevOps Lab 2 app running on Kubernetes (Minikube)"

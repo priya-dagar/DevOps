@@ -1,0 +1,45 @@
+### Two containers talking over a user-defined bridge network
+
+$ docker network create lab2net
+$ docker network ls | grep lab2net
+0f6f494d736a   lab2net    bridge    local
+
+$ docker run -d --name net-a --network lab2net ubuntu:24.04 sleep infinity
+78803bf67a504aeeb6d3423b4cebe4d317ae2c106fa97719ccbc546bbd3b5232
+$ docker run -d --name net-b --network lab2net ubuntu:24.04 sleep infinity
+245105f4700b21dff87ecd8fbbb3c42c150565d8c7e7c22257706ffcf0607049
+
+$ docker exec net-a apt-get install -y -qq iputils-ping   (minimal image: add ping)
+ping installed in both containers
+
+$ docker inspect net-a --format "net-a IP: {{.NetworkSettings.Networks.lab2net.IPAddress}}"
+net-a IP: 172.18.0.2
+$ docker inspect net-b --format "net-b IP: {{.NetworkSettings.Networks.lab2net.IPAddress}}"
+net-b IP: 172.18.0.3
+
+### Communication using the container NAME (embedded DNS)
+$ docker exec net-a ping -c 2 net-b
+PING net-b (172.18.0.3) 56(84) bytes of data.
+64 bytes from net-b.lab2net (172.18.0.3): icmp_seq=1 ttl=64 time=9.50 ms
+64 bytes from net-b.lab2net (172.18.0.3): icmp_seq=2 ttl=64 time=0.090 ms
+
+--- net-b ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1007ms
+rtt min/avg/max/mdev = 0.090/4.792/9.495/4.702 ms
+
+### Communication using the container IP ADDRESS
+$ docker exec net-a ping -c 2 172.18.0.3
+PING 172.18.0.3 (172.18.0.3) 56(84) bytes of data.
+64 bytes from 172.18.0.3: icmp_seq=1 ttl=64 time=0.087 ms
+64 bytes from 172.18.0.3: icmp_seq=2 ttl=64 time=0.116 ms
+
+--- 172.18.0.3 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1014ms
+rtt min/avg/max/mdev = 0.087/0.101/0.116/0.014 ms
+
+### Containers on the DEFAULT bridge network cannot resolve each other by name
+$ docker run -d --name net-c ubuntu:24.04 sleep infinity
+55e7620ea0cf21711585a65fd999571bdc9175eebdac7962bb405c4dd78faba7
+$ docker exec net-c ping -c 1 net-a
+ping: net-a: Name or service not known
+--> default bridge has no embedded DNS: user-defined networks are required for name resolution

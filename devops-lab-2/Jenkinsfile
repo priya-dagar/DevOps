@@ -1,0 +1,52 @@
+// Continuous deployment pipeline - Lab 2
+// builds the image, pushes it to Docker Hub and deploys it to the minikube cluster
+pipeline {
+    agent any
+
+    environment {
+        HUB_IMAGE = 'abhinaaav/devops-lab2-app'
+        VERSION = "2.1.${BUILD_NUMBER}"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo "Pulling source from GitHub..."
+                checkout scm
+            }
+        }
+        stage('Build image') {
+            steps {
+                echo "Building $HUB_IMAGE:$VERSION"
+                sh "docker build --build-arg APP_VERSION=$VERSION -f docker/Dockerfile -t $HUB_IMAGE:$VERSION ."
+            }
+        }
+        stage('Push to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub',
+                        usernameVariable: 'DH_USER',
+                        passwordVariable: 'DH_TOKEN')]) {
+                    sh 'echo $DH_TOKEN | docker login -u $DH_USER --password-stdin'
+                    sh "docker push $HUB_IMAGE:$VERSION"
+                }
+            }
+        }
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh 'kubectl apply -f k8s/'
+                sh "kubectl set image deployment/lab2-app lab2-app=$HUB_IMAGE:$VERSION"
+                sh 'kubectl rollout status deployment/lab2-app --timeout=180s'
+                sh 'NODE_IP=$(kubectl get nodes -o jsonpath="{.items[0].status.addresses[0].address}") && curl -s http://$NODE_IP:30080/health'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "CD finished: SUCCESS - $HUB_IMAGE:$VERSION is live on the cluster"
+        }
+        failure {
+            echo 'CD finished: FAILED'
+        }
+    }
+}

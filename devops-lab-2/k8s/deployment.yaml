@@ -1,0 +1,38 @@
+# Lab 2 - Deployment for the flask app
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lab2-app
+  labels:
+    app: lab2-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: lab2-app
+  template:
+    metadata:
+      labels:
+        app: lab2-app
+    spec:
+      containers:
+        - name: lab2-app
+          image: devops-lab2-app:2.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+          envFrom:
+            - configMapRef:
+                name: lab2-app-config
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 15
+            periodSeconds: 20

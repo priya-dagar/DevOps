@@ -1,0 +1,13 @@
+# Lab 2 - NodePort service exposing the flask app
+apiVersion: v1
+kind: Service
+metadata:
+  name: lab2-app-service
+spec:
+  type: NodePort
+  selector:
+    app: lab2-app
+  ports:
+    - port: 5000
+      targetPort: 5000
+      nodePort: 30080

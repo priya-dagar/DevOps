@@ -1,0 +1,105 @@
+### Rebuild the current deployment so the version comes from the image
+$ kubectl apply -f k8s/   (configmap updated: version now comes from the image)
+configmap/lab2-app-config configured
+deployment.apps/lab2-app unchanged
+service/lab2-app-service unchanged
+$ kubectl rollout restart deployment/lab2-app
+deployment.apps/lab2-app restarted
+Waiting for deployment "lab2-app" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "lab2-app" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "lab2-app" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "lab2-app" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "lab2-app" rollout to finish: 1 old replicas are pending termination...
+deployment "lab2-app" successfully rolled out
+
+### ROLLING UPDATE: build a 2.0.1 image and update the deployment
+$ docker build --build-arg APP_VERSION=2.0.1 -f docker/Dockerfile -t devops-lab2-app:2.0.1 .
+sha256:fef050679ffdb785482dd072d3951f26640a53eb615b4c03a54305e46f5a43fe
+$ minikube image load devops-lab2-app:2.0.1
+
+$ kubectl set image deployment/lab2-app lab2-app=devops-lab2-app:2.0.1
+deployment.apps/lab2-app image updated
+
+$ kubectl get pods -l app=lab2-app -w   (pods replaced one by one - captured with snapshots)
+-- t=1 0/1 ContainerCreating 0 1/1 Terminating 0 1/1 Running 0 1/1 Running 0 
+Waiting for deployment "lab2-app" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "lab2-app" rollout to finish: 1 out of 2 new replicas have been updated...
+-- t=2 0/1 Running 0 1/1 Running 0 1/1 Running 0 
+-- t=3 0/1 Running 0 1/1 Running 0 1/1 Running 0 
+-- t=4 0/1 Running 0 1/1 Running 0 1/1 Running 0 
+Waiting for deployment "lab2-app" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "lab2-app" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "lab2-app" rollout to finish: 1 old replicas are pending termination...
+-- t=5 0/1 Running 0 1/1 Running 0 1/1 Running 0 1/1 Terminating 0 
+-- t=6 0/1 Running 0 1/1 Running 0 1/1 Running 0 1/1 Terminating 0 
+-- t=7 0/1 Running 0 1/1 Running 0 1/1 Running 0 1/1 Terminating 0 
+Waiting for deployment "lab2-app" rollout to finish: 1 old replicas are pending termination...
+deployment "lab2-app" successfully rolled out
+
+$ kubectl get pods -l app=lab2-app
+-- t=8 1/1 Running 0 1/1 Running 0 1/1 Terminating 0 1/1 Terminating 0 
+NAME                        READY   STATUS        RESTARTS   AGE
+lab2-app-56dd487c9b-2ctj2   1/1     Running       0          12s
+lab2-app-56dd487c9b-682tp   1/1     Running       0          25s
+lab2-app-88f4c9fc9-9fjc5    1/1     Terminating   0          77s
+lab2-app-88f4c9fc9-kdrsn    1/1     Terminating   0          65s
+
+$ curl health after rolling update:
+{"status":"UP","version":"2.0.1"}
+
+
+$ kubectl rollout history deployment/lab2-app
+deployment.apps/lab2-app 
+REVISION  CHANGE-CAUSE
+1         <none>
+2         <none>
+3         <none>
+4         <none>
+
+
+### ROLLBACK: undo to the previous revision (2.0.0 image)
+$ kubectl rollout undo deployment/lab2-app
+Warning: resource deployments/lab2-app was previously managed with 'kubectl apply'. Rolling back will not update the kubectl.kubernetes.io/last-applied-configuration annotation, which may cause unexpected behavior on future 'kubectl apply' operations. Consider using 'kubectl apply' with your previous configuration file instead.
+deployment.apps/lab2-app rolled back
+Waiting for deployment "lab2-app" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "lab2-app" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "lab2-app" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "lab2-app" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "lab2-app" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "lab2-app" rollout to finish: 1 old replicas are pending termination...
+deployment "lab2-app" successfully rolled out
+
+$ kubectl get pods -l app=lab2-app
+NAME                        READY   STATUS        RESTARTS   AGE
+lab2-app-56dd487c9b-2ctj2   1/1     Terminating   0          59s
+lab2-app-56dd487c9b-682tp   1/1     Terminating   0          72s
+lab2-app-88f4c9fc9-bv4qd    1/1     Running       0          12s
+lab2-app-88f4c9fc9-snrr5    1/1     Running       0          24s
+
+$ curl health after rollback:
+{"status":"UP","version":"2.0.1"}
+
+--> the app is serving 2.0.0 again after the rollback
+
+$ kubectl rollout history deployment/lab2-app
+deployment.apps/lab2-app 
+REVISION  CHANGE-CAUSE
+1         <none>
+2         <none>
+4         <none>
+5         <none>
+
+
+### Post-rollback verification (after old pods fully terminated)
+$ kubectl get pods -l app=lab2-app -o jsonpath image field
+lab2-app-88f4c9fc9-bv4qd: devops-lab2-app:2.0.0
+lab2-app-88f4c9fc9-snrr5: devops-lab2-app:2.0.0
+
+$ curl http://192.168.49.2:30080/health
+{"status":"UP","version":"2.0.0"}
+
+
+# OBSERVATION: the curl taken immediately after 'rollout undo' returned 2.0.1
+# because the terminating 2.0.1 pods were still registered in the service
+# endpoints for a few seconds. Once they finished terminating, the service
+# served only 2.0.0 pods. Zero-downtime is preserved during this overlap.

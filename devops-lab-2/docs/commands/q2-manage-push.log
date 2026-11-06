@@ -1,0 +1,200 @@
+### Container lifecycle management
+$ docker ps   (running containers)
+NAMES      IMAGE                                 STATUS          PORTS
+lab2-app   devops-lab2-app:2.0.0                 Up 8 minutes    0.0.0.0:5000->5000/tcp, [::]:5000->5000/tcp
+minikube   gcr.io/k8s-minikube/kicbase:v0.0.51   Up 13 minutes   127.0.0.1:44620->22/tcp, 127.0.0.1:44621->2376/tcp, 127.0.0.1:44622->5000/tcp, 127.0.0.1:44623->8443/tcp, 127.0.0.1:44624->32443/tcp
+
+$ docker stop lab2-app
+lab2-app
+$ docker ps -a --filter name=lab2-app   (stopped container still exists)
+NAMES      STATUS
+lab2-app   Exited (137) Less than a second ago
+
+$ docker start lab2-app
+lab2-app
+$ docker restart lab2-app
+lab2-app
+$ curl http://localhost:5000/health   (container back up)
+
+
+### Image management
+$ docker images devops-lab2-app
+IMAGE                   ID             DISK USAGE   CONTENT SIZE   EXTRA
+devops-lab2-app:2.0.0   66c210e3f934        204MB         49.6MB   U    
+$ docker tag devops-lab2-app:2.0.0 abhinaaav/devops-lab2-app:2.0.0
+IMAGE                             ID             DISK USAGE   CONTENT SIZE   EXTRA
+abhinaaav/devops-lab2-app:2.0.0   66c210e3f934        204MB         49.6MB   U    
+
+$ echo <token> | docker login -u abhinaaav --password-stdin
+Login Succeeded
+
+$ docker push abhinaaav/devops-lab2-app:2.0.0
+The push refers to repository [docker.io/abhinaaav/devops-lab2-app]
+6fc242d221a6: Waiting
+3eb771151506: Waiting
+93a7b47bf0c0: Waiting
+44136fa355b3: Waiting
+93a7b47bf0c0: Waiting
+44136fa355b3: Waiting
+6fc242d221a6: Waiting
+3eb771151506: Waiting
+3eb771151506: Waiting
+93a7b47bf0c0: Waiting
+44136fa355b3: Waiting
+6fc242d221a6: Waiting
+3eb771151506: Waiting
+93a7b47bf0c0: Waiting
+44136fa355b3: Waiting
+6fc242d221a6: Waiting
+3eb771151506: Waiting
+93a7b47bf0c0: Waiting
+44136fa355b3: Waiting
+6fc242d221a6: Waiting
+3eb771151506: Waiting
+93a7b47bf0c0: Waiting
+44136fa355b3: Waiting
+6fc242d221a6: Waiting
+3eb771151506: Waiting
+93a7b47bf0c0: Waiting
+44136fa355b3: Waiting
+6fc242d221a6: Waiting
+6fc242d221a6: Waiting
+3eb771151506: Waiting
+93a7b47bf0c0: Waiting
+44136fa355b3: Waiting
+93a7b47bf0c0: Waiting
+44136fa355b3: Waiting
+6fc242d221a6: Waiting
+3eb771151506: Waiting
+3eb771151506: Waiting
+93a7b47bf0c0: Waiting
+44136fa355b3: Waiting
+6fc242d221a6: Waiting
+6fc242d221a6: Waiting
+3eb771151506: Waiting
+93a7b47bf0c0: Waiting
+44136fa355b3: Waiting
+3eb771151506: Waiting
+93a7b47bf0c0: Waiting
+44136fa355b3: Waiting
+6fc242d221a6: Waiting
+3eb771151506: Waiting
+93a7b47bf0c0: Waiting
+44136fa355b3: Waiting
+6fc242d221a6: Waiting
+44136fa355b3: Waiting
+6fc242d221a6: Waiting
+3eb771151506: Waiting
+93a7b47bf0c0: Waiting
+6fc242d221a6: Waiting
+3eb771151506: Waiting
+93a7b47bf0c0: Waiting
+44136fa355b3: Waiting
+3eb771151506: Waiting
+93a7b47bf0c0: Waiting
+44136fa355b3: Waiting
+6fc242d221a6: Waiting
+3eb771151506: Waiting
+93a7b47bf0c0: Waiting
+44136fa355b3: Waiting
+6fc242d221a6: Waiting
+3eb771151506: Waiting
+93a7b47bf0c0: Waiting
+44136fa355b3: Waiting
+6fc242d221a6: Waiting
+3eb771151506: Waiting
+93a7b47bf0c0: Waiting
+44136fa355b3: Waiting
+6fc242d221a6: Waiting
+3eb771151506: Waiting
+93a7b47bf0c0: Waiting
+44136fa355b3: Waiting
+6fc242d221a6: Waiting
+3eb771151506: Waiting
+93a7b47bf0c0: Waiting
+44136fa355b3: Waiting
+6fc242d221a6: Waiting
+3eb771151506: Waiting
+93a7b47bf0c0: Waiting
+44136fa355b3: Waiting
+6fc242d221a6: Waiting
+3eb771151506: Waiting
+93a7b47bf0c0: Waiting
+44136fa355b3: Waiting
+6fc242d221a6: Waiting
+93a7b47bf0c0: Waiting
+44136fa355b3: Waiting
+6fc242d221a6: Waiting
+3eb771151506: Waiting
+3eb771151506: Waiting
+6fc242d221a6: Waiting
+6fc242d221a6: Waiting
+6fc242d221a6: Waiting
+44136fa355b3: Pushed
+f574edac59d9: Waiting
+acca7542dfc7: Waiting
+f574edac59d9: Waiting
+f574edac59d9: Waiting
+e25294ca6fe2: Waiting
+93a7b47bf0c0: Pushed
+acca7542dfc7: Waiting
+f574edac59d9: Waiting
+e25294ca6fe2: Waiting
+acca7542dfc7: Waiting
+e25294ca6fe2: Waiting
+acca7542dfc7: Waiting
+f574edac59d9: Waiting
+f574edac59d9: Waiting
+e25294ca6fe2: Waiting
+acca7542dfc7: Waiting
+acca7542dfc7: Waiting
+f574edac59d9: Waiting
+e25294ca6fe2: Waiting
+f574edac59d9: Waiting
+e25294ca6fe2: Waiting
+acca7542dfc7: Waiting
+acca7542dfc7: Waiting
+e25294ca6fe2: Waiting
+51801fee10da: Waiting
+acca7542dfc7: Pushed
+51801fee10da: Waiting
+05d41c27bee2: Waiting
+e25294ca6fe2: Pushed
+05d41c27bee2: Waiting
+51801fee10da: Waiting
+3eb771151506: Pushed
+51801fee10da: Waiting
+05d41c27bee2: Waiting
+88f35e4ed46f: Waiting
+51801fee10da: Waiting
+05d41c27bee2: Waiting
+88f35e4ed46f: Waiting
+88f35e4ed46f: Waiting
+51801fee10da: Waiting
+05d41c27bee2: Waiting
+51801fee10da: Waiting
+05d41c27bee2: Waiting
+88f35e4ed46f: Waiting
+05d41c27bee2: Waiting
+88f35e4ed46f: Waiting
+05d41c27bee2: Waiting
+88f35e4ed46f: Waiting
+88f35e4ed46f: Waiting
+88f35e4ed46f: Waiting
+88f35e4ed46f: Waiting
+88f35e4ed46f: Waiting
+88f35e4ed46f: Waiting
+349bfdbe9785: Waiting
+51801fee10da: Pushed
+349bfdbe9785: Waiting
+349bfdbe9785: Waiting
+349bfdbe9785: Waiting
+349bfdbe9785: Waiting
+349bfdbe9785: Waiting
+349bfdbe9785: Waiting
+88f35e4ed46f: Pushed
+349bfdbe9785: Pushed
+f574edac59d9: Pushed
+05d41c27bee2: Pushed
+6fc242d221a6: Pushed
+2.0.0: digest: sha256:66c210e3f9344d4f0a6cdb4aed54e3e1430af368a951393c4ca0197b0679e1aa size: 856

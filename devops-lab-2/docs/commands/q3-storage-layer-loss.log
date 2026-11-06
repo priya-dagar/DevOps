@@ -1,0 +1,22 @@
+### Demo 1: data in the container layer is LOST when the container is deleted
+
+$ docker rm -f demo-layer
+$ docker run -d --name demo-layer ubuntu:24.04 sleep infinity
+Unable to find image 'ubuntu:24.04' locally
+24.04: Pulling from library/ubuntu
+7a48b8f0e5c7: Pulling fs layer
+98144013299c: Download complete
+7a48b8f0e5c7: Download complete
+7a48b8f0e5c7: Pull complete
+Digest: sha256:fe81560990fae86dc4743202b2cb4d3df98d0bcf949173cecef15ce1127ef852
+Status: Downloaded newer image for ubuntu:24.04
+c8cbc28ba7efe20c2c184917a0011990b3071f1fece42c919976d17faedce2ee
+$ docker exec demo-layer sh -c "echo important-data > /tmp/note.txt && cat /tmp/note.txt"
+important-data
+
+$ docker rm -f demo-layer   # container deleted
+demo-layer
+$ docker run -d --name demo-layer ubuntu:24.04 sleep infinity && docker exec demo-layer cat /tmp/note.txt
+f82d9ad0777a2d9524cf6b50d025ef71565a4ce3a96f2ddcc09ced17e657d6ce
+cat: /tmp/note.txt: No such file or directory
+--> file is GONE: container-layer data does not survive container deletion

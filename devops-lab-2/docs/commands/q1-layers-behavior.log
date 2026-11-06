@@ -1,0 +1,43 @@
+$ docker history devops-lab2-app:2.0.0
+IMAGE          CREATED          CREATED BY                                      SIZE      COMMENT
+66c210e3f934   11 seconds ago   CMD ["python" "app.py"]                         0B        buildkit.dockerfile.v0
+<missing>      11 seconds ago   USER appuser                                    0B        buildkit.dockerfile.v0
+<missing>      11 seconds ago   RUN /bin/sh -c useradd -m appuser # buildkit    69.6kB    buildkit.dockerfile.v0
+<missing>      11 seconds ago   EXPOSE [5000/tcp]                               0B        buildkit.dockerfile.v0
+<missing>      12 seconds ago   COPY app/ /app/ # buildkit                      20.5kB    buildkit.dockerfile.v0
+<missing>      12 seconds ago   RUN /bin/sh -c pip install --no-cache-dir -r…   19.9MB    buildkit.dockerfile.v0
+<missing>      18 seconds ago   COPY app/requirements.txt /app/requirements.…   12.3kB    buildkit.dockerfile.v0
+<missing>      18 seconds ago   WORKDIR /app                                    8.19kB    buildkit.dockerfile.v0
+<missing>      6 days ago       CMD ["python3"]                                 0B        buildkit.dockerfile.v0
+<missing>      6 days ago       RUN /bin/sh -c set -eux;  for src in idle3 p…   16.4kB    buildkit.dockerfile.v0
+<missing>      6 days ago       RUN /bin/sh -c set -eux;   savedAptMark="$(a…   41.4MB    buildkit.dockerfile.v0
+<missing>      6 days ago       ENV PYTHON_SHA256=b5796915dc45ff745cfb4e990a…   0B        buildkit.dockerfile.v0
+<missing>      6 days ago       ENV PYTHON_VERSION=3.12.16                      0B        buildkit.dockerfile.v0
+<missing>      6 days ago       ENV GPG_KEY=7169605F62C751356D054A26A821E680…   0B        buildkit.dockerfile.v0
+<missing>      6 days ago       RUN /bin/sh -c set -eux;  apt-get update;  a…   4.93MB    buildkit.dockerfile.v0
+<missing>      6 days ago       ENV LANG=C.UTF-8                                0B        buildkit.dockerfile.v0
+<missing>      6 days ago       ENV PATH=/usr/local/bin:/usr/local/sbin:/usr…   0B        buildkit.dockerfile.v0
+<missing>      7 days ago       # debian.sh --arch 'amd64' out/ 'trixie' '@1…   87.7MB    debuerreotype 0.17
+
+$ docker inspect lab2-app --format "IP={{.NetworkSettings.IPAddress}} Ports={{.NetworkSettings.Ports}}"
+
+template parsing error: template: :1:21: executing "" at <.NetworkSettings.IPAddress>: map has no entry for key "IPAddress"
+
+$ docker inspect devops-lab2-app:2.0.0 --format "Layers={{len .RootFS.Layers}} Driver={{.GraphDriver.Name}}"
+
+template parsing error: template: :1:51: executing "" at <.GraphDriver.Name>: map has no entry for key "GraphDriver"
+
+$ docker logs lab2-app
+ * Serving Flask app 'app'
+ * Debug mode: off
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.17.0.2:5000
+[33mPress CTRL+C to quit[0m
+
+$ docker exec lab2-app python --version
+Python 3.12.16
+$ docker top lab2-app
+UID                 PID                 PPID                C                   STIME               TTY                 TIME                CMD
+abhinav             4270                4234                31                  19:48               ?                   00:00:00            python app.py

@@ -1,0 +1,49 @@
+### Docker Compose: multi-container setup (web + redis)
+(note: the standalone container from Q1 was stopped first to free port 5000)
+$ docker stop lab2-app && docker rm lab2-app
+lab2-app
+lab2-app
+
+$ docker compose -f docker/docker-compose.yml up -d
+ Network docker_lab2net Creating 
+ Network docker_lab2net Creating 
+ Network docker_lab2net Created 
+ Network docker_lab2net Created 
+ Container lab2-redis Creating 
+ Container lab2-redis Created 
+ Container docker-web-1 Creating 
+ Container docker-web-1 Created 
+ Container lab2-redis Starting 
+ Container lab2-redis Started 
+ Container docker-web-1 Starting 
+ Container docker-web-1 Started 
+
+$ docker compose -f docker/docker-compose.yml ps
+NAME           IMAGE                   COMMAND                  SERVICE   CREATED         STATUS                  PORTS
+docker-web-1   devops-lab2-app:2.0.0   "python app.py"          web       2 seconds ago   Up Less than a second   0.0.0.0:5000->5000/tcp, [::]:5000->5000/tcp
+lab2-redis     redis:7-alpine          "docker-entrypoint.s…"   redis     2 seconds ago   Up 2 seconds            0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp
+
+$ docker compose -f docker/docker-compose.yml logs web --tail 4
+
+### compose containers resolve each other by service name (own network lab2net)
+$ docker compose ... exec web python -c "import socket; print(\"redis IP:\", socket.gethostbyname(\"redis\"))"
+redis IP: 172.19.0.2
+
+$ curl http://localhost:5000/health   (web served by compose)
+{"status":"UP","version":"2.0.0"}
+
+
+$ docker compose -f docker/docker-compose.yml down
+ Container docker-web-1 Stopping 
+ Container docker-web-1 Stopped 
+ Container docker-web-1 Removing 
+ Container docker-web-1 Removed 
+ Container lab2-redis Stopping 
+ Container lab2-redis Stopped 
+ Container lab2-redis Removing 
+ Container lab2-redis Removed 
+ Network docker_lab2net Removing 
+ Network docker_lab2net Removed 
+
+$ docker compose -f docker/docker-compose.yml ps -a   (after down: nothing left)
+NAME      IMAGE     COMMAND   SERVICE   CREATED   STATUS    PORTS
