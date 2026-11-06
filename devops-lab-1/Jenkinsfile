@@ -1,0 +1,47 @@
+// Declarative pipeline for the DevOps Lab 1 flask app
+pipeline {
+    agent any
+
+    stages {
+        stage("Checkout") {
+            steps {
+                echo "Pulling source code from GitHub..."
+                checkout scm
+            }
+        }
+        stage("Build") {
+            steps {
+                echo "Installing dependencies..."
+                sh "python3 -m venv venv"
+                sh "./venv/bin/pip install -r app/requirements.txt"
+            }
+        }
+        stage("Test") {
+            steps {
+                echo "Running unit tests..."
+                sh "./venv/bin/python -m pytest tests/ -v"
+            }
+        }
+        stage("Package") {
+            steps {
+                sh "mkdir -p dist && tar czf dist/app-build-${BUILD_NUMBER}.tar.gz app tests"
+                archiveArtifacts artifacts: "dist/*.tar.gz", fingerprint: true
+            }
+        }
+        stage("Deploy") {
+            steps {
+                echo "Deploying app to /opt/devops-lab1 and restarting service..."
+                sh "sudo bash /var/lib/jenkins/workspace/devops-lab-pipeline/scripts/deploy.sh"
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Pipeline finished: BUILD SUCCESS"
+        }
+        failure {
+            echo "Pipeline finished: BUILD FAILED"
+        }
+    }
+}

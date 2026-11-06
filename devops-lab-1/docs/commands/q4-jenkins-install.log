@@ -1,0 +1,54 @@
+$ sudo apt install -y openjdk-17-jdk
+Reading package lists... Done
+Setting up openjdk-17-jdk:amd64 ...
+$ java -version
+openjdk version "17.0.10" 2024-01-16
+OpenJDK Runtime Environment (build 17.0.10+7-Ubuntu-1)
+
+$ curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo gpg --dearmor -o /usr/share/keyrings/jenkins.gpg
+$ echo deb [signed-by=/usr/share/keyrings/jenkins.gpg] https://pkg.jenkins.io/debian-stable binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list
+deb [signed-by=/usr/share/keyrings/jenkins.gpg] https://pkg.jenkins.io/debian-stable binary/
+
+$ sudo apt update && sudo apt install -y jenkins
+W: GPG error: https://pkg.jenkins.io/debian-stable binary/ Release: The following signatures
+   couldn't be verified because the public key is not available: NO_PUBKEY 7198F4B714ABFC68
+E: The repository 'https://pkg.jenkins.io/debian-stable binary/ Release' is not signed.
+E: Package 'jenkins' has no installation candidate
+
+# NOTE: the old 2023 Jenkins signing key expired, updated to the new 2026 key
+# (per https://www.jenkins.io/blog/2025/12/23/repository-signing-keys-changing/)
+$ curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key | sudo tee /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+$ echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list
+deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/
+
+$ sudo apt update && sudo apt install -y jenkins
+Get:1 https://pkg.jenkins.io/debian-stable binary/ jenkins 2.580.2-1.1
+Setting up jenkins (2.580.2) ...
+
+$ sudo systemctl enable --now jenkins
+Job for jenkins.service failed because the control process exited with error code.
+$ sudo journalctl -u jenkins -n 5
+jenkins[336]: Running with Java 17 from /usr/lib/jvm/java-17-openjdk-amd64, which is older
+             than the minimum required version (Java 21).
+jenkins[336]: Supported Java versions are: [21, 25]
+
+# Jenkins 2.580 LTS needs Java 21 minimum, so installed openjdk-21
+$ sudo apt install -y openjdk-21-jdk
+$ sudo update-alternatives --set java /usr/lib/jvm/java-21-openjdk-amd64/bin/java
+$ java -version
+openjdk version "21.0.10" 2026-01-20
+OpenJDK Runtime Environment (build 21.0.10+1-Ubuntu-1)
+
+$ sudo systemctl reset-failed jenkins && sudo systemctl start jenkins
+$ systemctl status jenkins --no-pager
+● jenkins.service - Jenkins Continuous Integration Server
+     Loaded: loaded (/usr/lib/systemd/system/jenkins.service; enabled; preset: enabled)
+     Active: active (running) since Tue 2026-11-03 17:35:13 UTC; 8s ago
+   Main PID: 187 (java)
+
+$ curl -I http://localhost:8080
+HTTP/1.1 403 Forbidden
+Server: Jetty(12.1.14)
+
+$ sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+31fef59ecb034c4e8396cf2e8a5ae606

@@ -1,0 +1,122 @@
+Started by an SCM change
+Obtained Jenkinsfile from git https://github.com/theabhinav0231/devops-lab-1.git
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on Jenkins in /var/lib/jenkins/workspace/devops-lab-pipeline
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Declarative: Checkout SCM)
+[Pipeline] checkout
+Selected Git installation does not exist. Using Default
+The recommended git tool is: NONE
+No credentials specified
+ > git rev-parse --resolve-git-dir /var/lib/jenkins/workspace/devops-lab-pipeline/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/theabhinav0231/devops-lab-1.git # timeout=10
+Fetching upstream changes from https://github.com/theabhinav0231/devops-lab-1.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.43.0'
+ > git fetch --tags --force --progress -- https://github.com/theabhinav0231/devops-lab-1.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git rev-parse refs/remotes/origin/main^{commit} # timeout=10
+Checking out Revision 7530c850b576d375932df4a89760da3f1d340095 (refs/remotes/origin/main)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 7530c850b576d375932df4a89760da3f1d340095 # timeout=10
+Commit message: "bump app version to 1.0.1 and add lab observations"
+ > git rev-list --no-walk 8946b3fe124081fea964006e200187e7cf41b940 # timeout=10
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Checkout)
+[Pipeline] echo
+Pulling source code from GitHub...
+[Pipeline] checkout
+Selected Git installation does not exist. Using Default
+The recommended git tool is: NONE
+No credentials specified
+ > git rev-parse --resolve-git-dir /var/lib/jenkins/workspace/devops-lab-pipeline/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/theabhinav0231/devops-lab-1.git # timeout=10
+Fetching upstream changes from https://github.com/theabhinav0231/devops-lab-1.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.43.0'
+ > git fetch --tags --force --progress -- https://github.com/theabhinav0231/devops-lab-1.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git rev-parse refs/remotes/origin/main^{commit} # timeout=10
+Checking out Revision 7530c850b576d375932df4a89760da3f1d340095 (refs/remotes/origin/main)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 7530c850b576d375932df4a89760da3f1d340095 # timeout=10
+Commit message: "bump app version to 1.0.1 and add lab observations"
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Build)
+[Pipeline] echo
+Installing dependencies...
+[Pipeline] sh
++ python3 -m venv venv
+[Pipeline] sh
++ ./venv/bin/pip install -r app/requirements.txt
+Requirement already satisfied: flask==3.1.0 in ./venv/lib/python3.12/site-packages (from -r app/requirements.txt (line 1)) (3.1.0)
+Requirement already satisfied: pytest==8.3.4 in ./venv/lib/python3.12/site-packages (from -r app/requirements.txt (line 2)) (8.3.4)
+Requirement already satisfied: Werkzeug>=3.1 in ./venv/lib/python3.12/site-packages (from flask==3.1.0->-r app/requirements.txt (line 1)) (3.1.9)
+Requirement already satisfied: Jinja2>=3.1.2 in ./venv/lib/python3.12/site-packages (from flask==3.1.0->-r app/requirements.txt (line 1)) (3.1.6)
+Requirement already satisfied: itsdangerous>=2.2 in ./venv/lib/python3.12/site-packages (from flask==3.1.0->-r app/requirements.txt (line 1)) (2.2.0)
+Requirement already satisfied: click>=8.1.3 in ./venv/lib/python3.12/site-packages (from flask==3.1.0->-r app/requirements.txt (line 1)) (8.5.0)
+Requirement already satisfied: blinker>=1.9 in ./venv/lib/python3.12/site-packages (from flask==3.1.0->-r app/requirements.txt (line 1)) (1.9.0)
+Requirement already satisfied: iniconfig in ./venv/lib/python3.12/site-packages (from pytest==8.3.4->-r app/requirements.txt (line 2)) (2.3.1)
+Requirement already satisfied: packaging in ./venv/lib/python3.12/site-packages (from pytest==8.3.4->-r app/requirements.txt (line 2)) (26.3)
+Requirement already satisfied: pluggy<2,>=1.5 in ./venv/lib/python3.12/site-packages (from pytest==8.3.4->-r app/requirements.txt (line 2)) (1.7.0)
+Requirement already satisfied: MarkupSafe>=2.0 in ./venv/lib/python3.12/site-packages (from Jinja2>=3.1.2->flask==3.1.0->-r app/requirements.txt (line 1)) (3.0.4)
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Test)
+[Pipeline] echo
+Running unit tests...
+[Pipeline] sh
++ ./venv/bin/python -m pytest tests/ -v
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.4, pluggy-1.7.0 -- /var/lib/jenkins/workspace/devops-lab-pipeline/venv/bin/python
+cachedir: .pytest_cache
+rootdir: /var/lib/jenkins/workspace/devops-lab-pipeline
+collecting ... collected 2 items
+
+tests/test_app.py::test_index_returns_message PASSED                     [ 50%]
+tests/test_app.py::test_health_returns_up PASSED                         [100%]
+
+============================== 2 passed in 0.22s ===============================
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Package)
+[Pipeline] sh
++ mkdir -p dist
++ tar czf dist/app-build-2.tar.gz app tests
+[Pipeline] archiveArtifacts
+Archiving artifacts
+Recording fingerprints
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Deploy)
+[Pipeline] echo
+Deploying app to /opt/devops-lab1 and restarting service...
+[Pipeline] sh
++ sudo bash /var/lib/jenkins/workspace/devops-lab-pipeline/scripts/deploy.sh
+Deploying from /var/lib/jenkins/workspace/devops-lab-pipeline to /opt/devops-lab1 ...
+Deploy successful - health check returned HTTP 200
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Declarative: Post Actions)
+[Pipeline] echo
+Pipeline finished: BUILD SUCCESS
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+Finished: SUCCESS

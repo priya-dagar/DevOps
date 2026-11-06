@@ -1,0 +1,20 @@
+$ sudo apt update && sudo apt install -y git
+Reading package lists... Done
+git is already the newest version (1:2.43.0-1ubuntu7.4).
+0 upgraded, 0 newly installed, 0 to remove and 12 not upgraded.
+
+$ git --version
+git version 2.43.0
+
+$ git config --global user.name "abhinav"
+$ git config --global user.email "abhinav0231gamer@gmail.com"
+$ git config --global init.defaultBranch main
+
+$ git config --list | grep -E "user|init"
+user.name=abhinav
+user.email=abhinav0231gamer@gmail.com
+init.defaultbranch=main
+
+$ git config user.name && git config user.email
+abhinav
+abhinav0231gamer@gmail.com

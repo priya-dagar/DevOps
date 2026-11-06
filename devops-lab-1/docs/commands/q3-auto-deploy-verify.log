@@ -1,0 +1,11 @@
+$ curl http://localhost:5000/health   (after automatic build #2)
+{"status":"UP","version":"1.0.1"}
+
+
+$ git -C /var/lib/jenkins/workspace/devops-lab-pipeline log -1 --oneline
+7530c85 bump app version to 1.0.1 and add lab observations
+
+$ head -3 of build 2 console (trigger source)
+Started by an SCM change
+Obtained Jenkinsfile from git https://github.com/theabhinav0231/devops-lab-1.git
+[Pipeline] Start of Pipeline

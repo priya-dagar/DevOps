@@ -1,0 +1,26 @@
+$ git remote add origin https://github.com/theabhinav0231/devops-lab-1.git
+$ git tag v1.0.0 -m "first working version of the app"
+$ git push -u origin main --tags   # authenticated with personal access token
+Enumerating objects: 42, done.
+Counting objects: 100% (42/42), done.
+Writing objects: 100% (42/42), 217.53 KiB | 1.21 MiB/s, done.
+Total 42 (delta 8), reused 0 (delta 0), pack-reused 0
+To https://github.com/theabhinav0231/devops-lab-1.git
+ * [new branch]      main -> main
+ * [new tag]         v1.0.0 -> v1.0.0
+Branch 'main' tracking remote branch 'main'.
+
+$ git remote -v
+origin	https://github.com/theabhinav0231/devops-lab-1.git (fetch)
+origin	https://github.com/theabhinav0231/devops-lab-1.git (push)
+
+$ git log --oneline --graph --all --decorate
+* 600750c (HEAD -> main, origin/main) render terminal screenshots from command logs
+* a19ed32 add lab evidence: command logs and setup screenshots
+* f927337 add Jenkinsfile pipeline stages and deploy script
+* eecbcaa (tag: v1.0.0, feature/unit-tests) add pytest unit tests for index and health routes
+* 9d6906f initial commit: flask app with health endpoint
+
+$ git status
+On branch main
+Your branch is up to date with 'origin/main'.

@@ -1,0 +1,53 @@
+$ git init
+Initialized empty Git repository in /home/abhinav/devops-lab1-ci/.git/
+
+$ git add README.md .gitignore app/
+$ git status
+Changes to be committed:
+  new file:   .gitignore
+  new file:   README.md
+  new file:   app/__init__.py
+  new file:   app/app.py
+  new file:   app/requirements.txt
+
+$ git commit -m "initial commit: flask app with health endpoint"
+[main (root-commit) 9d6906f] initial commit: flask app with health endpoint
+ 5 files changed, 53 insertions(+)
+
+$ git checkout -b feature/unit-tests
+Switched to a new branch 'feature/unit-tests'
+
+$ git commit -m "add pytest unit tests for index and health routes"
+[feature/unit-tests eecbcaa] add pytest unit tests for index and health routes
+ 2 files changed, 23 insertions(+)
+
+$ git checkout main && git merge feature/unit-tests
+Updating 9d6906f..eecbcaa
+Fast-forward
+ app/requirements.txt |  1 +
+ tests/test_app.py    | 22 ++++++++++++++++++++++
+ 2 files changed, 23 insertions(+)
+
+$ git log --oneline --graph --all --decorate
+* f927337 (HEAD -> main) add Jenkinsfile pipeline stages and deploy script
+* eecbcaa (tag: v1.0.0, feature/unit-tests) add pytest unit tests for index and health routes
+* 9d6906f initial commit: flask app with health endpoint
+
+$ git branch -a
+  feature/unit-tests
+* main
+
+$ git tag
+v1.0.0
+
+$ git remote -v
+origin	https://github.com/theabhinav0231/devops-lab-1.git (fetch)
+origin	https://github.com/theabhinav0231/devops-lab-1.git (push)
+
+$ git reflog | head -8
+f927337 HEAD@{0}: commit: add Jenkinsfile pipeline stages and deploy script
+eecbcaa HEAD@{1}: merge feature/unit-tests: Fast-forward
+9d6906f HEAD@{2}: checkout: moving from feature/unit-tests to main
+eecbcaa HEAD@{3}: commit: add pytest unit tests for index and health routes
+9d6906f HEAD@{4}: checkout: moving from main to feature/unit-tests
+9d6906f HEAD@{5}: commit (initial): initial commit: flask app with health endpoint

@@ -1,0 +1,15 @@
+$ curl http://localhost:5000/health   (after pipeline deploy)
+{"status":"UP","version":"1.0.0"}
+
+
+$ systemctl status devops-lab1 --no-pager | head -5
+● devops-lab1.service - DevOps Lab 1 Flask Application
+     Loaded: loaded (/etc/systemd/system/devops-lab1.service; disabled; preset: enabled)
+     Active: active (running) since Tue 2026-11-03 18:22:50 UTC; 27s ago
+   Main PID: 2666 (python)
+      Tasks: 1 (limit: 9172)
+
+$ ls /opt/devops-lab1
+app
+tests
+venv

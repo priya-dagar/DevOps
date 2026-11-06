@@ -1,0 +1,6 @@
+$ curl http://localhost:5000/
+{"message":"DevOps Lab 1 CI/CD pipeline is working","version":"1.0.1"}
+
+
+$ curl http://localhost:5000/health
+{"status":"UP","version":"1.0.1"}

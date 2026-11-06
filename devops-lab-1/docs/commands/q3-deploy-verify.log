@@ -1,0 +1,20 @@
+$ sudo cp docs/devops-lab1.service /etc/systemd/system/
+$ sudo systemctl daemon-reload
+$ sudo systemctl enable --now devops-lab1
+
+$ systemctl status devops-lab1 --no-pager
+● devops-lab1.service - DevOps Lab 1 Flask Application
+     Loaded: loaded (/etc/systemd/system/devops-lab1.service; disabled; preset: enabled)
+     Active: active (running) since Tue 2026-11-03 18:03:37 UTC; 7min ago
+   Main PID: 1629 (python)
+      Tasks: 1 (limit: 9172)
+     Memory: 19.4M (peak: 20.3M)
+        CPU: 347ms
+     CGroup: /system.slice/devops-lab1.service
+
+$ curl http://localhost:5000/health
+{"status":"UP","version":"1.0.0"}
+
+
+$ cat /etc/sudoers.d/jenkins-deploy
+cat: /etc/sudoers.d/jenkins-deploy: Permission denied
